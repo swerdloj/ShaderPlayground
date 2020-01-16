@@ -207,6 +207,9 @@ void main() {
     vec2 uv = (gl_FragCoord.xy / u_screen_dimensions.xy - 0.5) * 2.; // -0.5 to 0.5, then -1 to 1
     uv.x *= u_screen_dimensions.x / u_screen_dimensions.y; // Aspect ratio
 
+    // Zoom in/out
+    uv *= u_position.z + 1.;
+
     vec3 color = vec3(0.); // Start with no color, then add color as we process the pixel
 
     vec3 object_color = vec3(0.2, 0.1, 0.5)*2.; // TODO: Move this to be defined per shape in map()

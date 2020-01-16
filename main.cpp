@@ -297,24 +297,29 @@ int main(int argc, char* argv[]) {
 			// fill buffer on another thread with per-frame screenshots, then use ffmpeg?
 		}
 		// TODO: How to use these with collision checking (like for clicking buttons)?
-		if (key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) { // forward (positive z direction)
-			translation_uniform[2] += 0.01f;
+		if (key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) { // up (positive y direction)
+			translation_uniform[1] -= 0.01f;
 		}
 		if (key_state[SDL_SCANCODE_A] || key_state[SDL_SCANCODE_LEFT]) { // left (negative x direction)
-			translation_uniform[0] -= 0.01f;
-		}
-		if (key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) { // backwards (negative z direction)
-			translation_uniform[2] -= 0.01f;
-		}
-		if (key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) { // right (positive x direction)
 			translation_uniform[0] += 0.01f;
 		}
-		// TODO: Better z-axis translations
-		if (key_state[SDL_SCANCODE_LSHIFT]) { // up (positive y direction)
+		if (key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) { // down (negative y direction)
 			translation_uniform[1] += 0.01f;
 		}
-		if (key_state[SDL_SCANCODE_LCTRL]) { // down (negative y direction)
-			translation_uniform[1] -= 0.01f;
+		if (key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) { // right (positive x direction)
+			translation_uniform[0] -= 0.01f;
+		}
+		// TODO: Better z-axis translations
+		if (key_state[SDL_SCANCODE_LSHIFT]) { // in (positive z direction)
+			translation_uniform[2] -= 0.01f;
+
+			// Do not allow negative zoom (there is a +1.0f offset in the shader)
+			if (translation_uniform[2] < -1.0f) {
+				translation_uniform[2] = -1.0f;
+			}
+		}
+		if (key_state[SDL_SCANCODE_LCTRL]) { // out (negative z direction)
+			translation_uniform[2] += 0.01f;
 		}
 
 		/* Draw to screen here */
@@ -343,7 +348,11 @@ int main(int argc, char* argv[]) {
 
 		// TODO: Have two time options: (1) for realtime (delta time), (2) for rendering (tick time once each frame)
 		Uint32 delta_time = timer.delta_time();
-		time_uniform += delta_time;
+		
+		if (!pause_time) {
+			time_uniform += delta_time;
+		}
+
 		const float delay = 1000.0f / 60.0f; // 60 FPS
 		if (delta_time < (Uint32) delay) {
 			SDL_Delay(delay - delta_time);
