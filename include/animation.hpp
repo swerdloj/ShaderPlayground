@@ -3,6 +3,23 @@
 //  They can then be reset simultaneously
 // Confirm that this is necessary
 
+struct Animator {
+    Easing easing; // Which easing function to use
+    float key_frame; // Key frame for switching animation/style
+    float start_time; // When the animation started
+    float duration; // How long the animation is
+};
+
+// Easing functions available to the user
+enum Easing {
+    Linear,
+    Cubic,
+    Quadratic,
+    Exponential,
+    Sine,
+    // TODO: Add more easings
+};
+
 
 // TODO: Completion callback
 class Animation {
