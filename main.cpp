@@ -169,7 +169,7 @@ int main(int argc, char* argv[]) {
 
 	/* Non-essential stuff and testing stuff */
 	// TODO: Keep mouse large while held down, only shrink when released
-	Animation mouse_animation = Animation(175);
+	Animation mouse_animation = Animation(175, EasingFunctions::linear);
 	SDL_ShowCursor(SDL_DISABLE);
 	bool fullscreen = false;
 	Button test_button = Button(160.f, 80.f, window_width/2.f, window_height/2.f - 200.0f);
