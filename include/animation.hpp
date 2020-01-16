@@ -28,33 +28,33 @@ class Animation {
 
 public:
     bool animating; // Whether the animation should be going
-    float start_time; // Time when animation began
+    Uint32 start_time; // Time when animation began
     // TODO: Ensure this becomes seconds
-    float duration; // Animation length
+    Uint32 duration; // Animation length
 private:
 
     /* METHODS */
 
 public:
-    Animation(float animation_duration) {
+    Animation(Uint32 animation_duration) {
         this->animating = false;
-        this->start_time = -1.0f;
+        this->start_time = 0;
         this->duration = animation_duration;
     }
 
     // Begin animating
-    void start(float time) {
+    void start(Uint32 time) {
         this->animating = true;
         this->start_time = time;
     }
 
     // Advance the animation forward, ending it if past duration
-    float progress(float current_time) {
-        if (this->start_time < 0.0f) {
+    float progress(Uint32 current_time) {
+        if (this->start_time <= 0) {
             return 0.0f;
         }
 
-        float progress = (current_time - this->start_time) / this->duration;
+        float progress = (float)(current_time - this->start_time) / (float)this->duration;
         if (progress > 1.0f) {
             this->animating = false;
             return 0.0f;
@@ -65,7 +65,7 @@ public:
 
     // TODO: How to explain this? How to interface with this feature?
     // Ideally, this would be working user-specified easing functions & states
-    void bounce(float current_time) {
+    void bounce(Uint32 current_time) {
         if (!this->animating) return;
 
         float percentage = progress(current_time);
@@ -79,7 +79,7 @@ public:
     // Reset the animation (and stop it)
     void reset() {
         this->animating = false;
-        this->start_time = -1.0f;
+        this->start_time = 0;
     }
 private:
 

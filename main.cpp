@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
 	const GLfloat DARK_PURPLE[] = { 50.0f/255.0f, 50/255.0f, 80/255.0f, 1.0f };
 	
 	// FIXME: This is now a Uint32 (change this in the shader & GL calls)
-	GLfloat time_uniform = 0.0f;
+	GLint time_uniform = 0;
 
 	bool pause_time = false;
 
@@ -168,12 +168,13 @@ int main(int argc, char* argv[]) {
 	
 
 	/* Non-essential stuff and testing stuff */
+	// TODO: Keep mouse large while held down, only shrink when released
 	Animation mouse_animation = Animation(175);
 	SDL_ShowCursor(SDL_DISABLE);
 	bool fullscreen = false;
 	Button test_button = Button(160.f, 80.f, window_width/2.f, window_height/2.f - 200.0f);
 	// Button test_selector = Button(160.f + 20.0f, 80.f + 20.f, window_width/2.f, window_height/2.f - 200.0f);
-	Animation test_animation = Animation(500);
+	Animation test_animation = Animation(250);
 	Timer timer = Timer();
 
 	while (!should_quit) {
@@ -269,7 +270,7 @@ int main(int argc, char* argv[]) {
 					translation_uniform[0] = 0.f;
 					translation_uniform[1] = 0.f;
 					translation_uniform[2] = 0.f;
-					time_uniform = 0.f;
+					time_uniform = 0;
 
 					mouse_animation.reset();
 					test_animation.reset();
@@ -325,7 +326,7 @@ int main(int argc, char* argv[]) {
 		// glUniform#fv(layout, number of such vectors, pointer) --> the second number can be used to pass an multiple vectors from one array
 		glUniform2fv(0, 1, window_dimensions_uniform); // Pass window dimensions [width, height]
 		glUniform2fv(1, 1, mouse_coords_uniform); // Mouse coordinates in pixels
-		glUniform1f( 2,    time_uniform); // Time (random unit) TODO: use seconds
+		glUniform1f( 2,    (float)time_uniform); // Time (random unit) TODO: use seconds
 		glUniform3fv(3, 1, translation_uniform); // Move triangle
 		glUniform1f( 4,    mouse_animation.progress(time_uniform));
 		glUniform4fv(5, 1, test_button.normalize(window_dimensions_uniform[0], window_dimensions_uniform[1]));
@@ -338,22 +339,15 @@ int main(int argc, char* argv[]) {
 		SDL_GL_SwapWindow(window);
 		
 
+		/* Timing */
 
+		// TODO: Have two time options: (1) for realtime (delta time), (2) for rendering (tick time once each frame)
 		Uint32 delta_time = timer.delta_time();
 		time_uniform += delta_time;
 		const float delay = 1000.0f / 60.0f; // 60 FPS
 		if (delta_time < (Uint32) delay) {
 			SDL_Delay(delay - delta_time);
 		}
-
-
-
-		// TODO: Have two time options: (1) for realtime (delta time), (2) for rendering (tick time once each frame like now)
-		// Limit FPS to conserve CPU (temporary) -> use delta time later
-		// SDL_Delay(1000/60);
-		// if (!pause_time) {
-		// 	time_uniform += 0.01f;
-		// }
 	}
 
 	/* Cleanup & Exit */
