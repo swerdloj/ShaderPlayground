@@ -6,6 +6,7 @@
 #include "file_loader.hpp"
 #include "animation.hpp"
 #include "button.hpp"
+#include "timing.hpp"
 
 // NOTE: MSVC only
 // Q: Why the "32" if this works for x64? (https://docs.microsoft.com/en-us/windows/win32/winprog64/process-interoperability)
@@ -150,7 +151,9 @@ int main(int argc, char* argv[]) {
 
 	const GLfloat DARK_PURPLE[] = { 50.0f/255.0f, 50/255.0f, 80/255.0f, 1.0f };
 	
+	// FIXME: This is now a Uint32 (change this in the shader & GL calls)
 	GLfloat time_uniform = 0.0f;
+
 	bool pause_time = false;
 
 	// Translations in [x, y, z]
@@ -165,12 +168,13 @@ int main(int argc, char* argv[]) {
 	
 
 	/* Non-essential stuff and testing stuff */
-	Animation mouse_animation = Animation(0.1f);
+	Animation mouse_animation = Animation(175);
 	SDL_ShowCursor(SDL_DISABLE);
 	bool fullscreen = false;
 	Button test_button = Button(160.f, 80.f, window_width/2.f, window_height/2.f - 200.0f);
 	// Button test_selector = Button(160.f + 20.0f, 80.f + 20.f, window_width/2.f, window_height/2.f - 200.0f);
-	Animation test_animation = Animation(0.3f);
+	Animation test_animation = Animation(500);
+	Timer timer = Timer();
 
 	while (!should_quit) {
 		/* Clear frame here*/
@@ -334,12 +338,22 @@ int main(int argc, char* argv[]) {
 		SDL_GL_SwapWindow(window);
 		
 
+
+		Uint32 delta_time = timer.delta_time();
+		time_uniform += delta_time;
+		const float delay = 1000.0f / 60.0f; // 60 FPS
+		if (delta_time < (Uint32) delay) {
+			SDL_Delay(delay - delta_time);
+		}
+
+
+
 		// TODO: Have two time options: (1) for realtime (delta time), (2) for rendering (tick time once each frame like now)
 		// Limit FPS to conserve CPU (temporary) -> use delta time later
-		SDL_Delay(1000/60);
-		if (!pause_time) {
-			time_uniform += 0.01f;
-		}
+		// SDL_Delay(1000/60);
+		// if (!pause_time) {
+		// 	time_uniform += 0.01f;
+		// }
 	}
 
 	/* Cleanup & Exit */

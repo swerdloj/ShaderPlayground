@@ -3,7 +3,7 @@
 // Inputs
 layout(location = 0) uniform vec2 u_screen_dimensions; // Screen dimensions (x, y)
 layout(location = 1) uniform vec2 u_mouse_position; // Mouse position (x, y)
-layout(location = 2) uniform float u_time; // Time
+layout(location = 2) uniform float u_time; // Time in ms
 layout(location = 3) uniform vec3 u_position; // User position
 layout(location = 4) uniform float u_mouse_animation_state;
 layout(location = 5) uniform vec4 u_test_button; // [width, height, center.x, center.y]
@@ -86,12 +86,12 @@ MapResult map(vec2 point) {
     
     vec2 circle1_pos = point;
     MapResult circle1 = MapResult( sd_circle(circle1_pos, 0.2), MAT_GLOWY );
-    circle1.scene_distance -= sin(point.x*9. + u_time * 3.)*0.02; // Displacement mapping (wavy)
+    circle1.scene_distance -= sin(point.x*9. + u_time * 0.005)*0.02; // Displacement mapping (wavy)
     
     MapResult box1 = MapResult( sd_rect(point-vec2(-0.6, 0.5), vec2(0.2)), MAT_GLOWY );
     result = scene_add(result, box1);
     MapResult circle2 = MapResult( sd_circle(point-vec2(-0.6, 0.5), 0.2), MAT_GLOWY );
-    float box_morph = sd_morph(box1.scene_distance, circle2.scene_distance, sin(u_time)*0.5 + 0.5);
+    float box_morph = sd_morph(box1.scene_distance, circle2.scene_distance, sin(u_time*0.002)*0.5 + 0.5);
 
     result.scene_distance = sd_smooth_min(circle1.scene_distance, box_morph, 0.2);
 
@@ -121,7 +121,7 @@ MapResult map(vec2 point) {
     MapResult selector1 = MapResult( sd_rect(selector1_pos, vec2(0.25, 0.15)), MAT_GLOWY );
     MapResult selector2 = MapResult( sd_rect(selector2_pos, vec2(0.25, 0.15)), MAT_GLOWY );
 
-    result.scene_distance = min(result.scene_distance, sd_morph(selector1.scene_distance, selector2.scene_distance, sin(u_time*4.)*0.5 + 0.5));
+    result.scene_distance = min(result.scene_distance, sd_morph(selector1.scene_distance, selector2.scene_distance, sin(u_time*.002)*0.5 + 0.5));
     
     // TODO: Transition on mouse-hover
     // if () {
@@ -228,9 +228,9 @@ void main() {
     // Gamma correction
     color = pow( clamp(color, 0., 1.), vec3(0.4545) );
 	
-	if( mod(gl_FragCoord.y, 6.) < 2.) {
-		color -= vec3(0.01);
-	}
+	// if( mod(gl_FragCoord.y, 6.) < 2.) {
+	// 	color -= vec3(0.01);
+	// }
 	
     out_color = vec4(color, 1.);
 }

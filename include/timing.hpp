@@ -1,8 +1,23 @@
-#include <chrono>
+#include "SDL.h"
 
+// Manages time in ms
+class Timer {
+public:
+private:
+    // Uint32 tick_rate = 0;
+    Uint32 last_time = 0;
 
-// FIXME: How to use Ui64 or Uint64 or whichever one it was
-unsigned int time_in_ms() {
-    using namespace std::chrono;
-    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-}
+public:
+    Timer(/*Uint32 tick_rate*/) {
+        this->last_time = SDL_GetTicks();
+        // this->tick_rate = tick_rate;
+    }
+
+    Uint32 delta_time() {
+        Uint32 last_time_copy = this->last_time;
+        this->last_time = SDL_GetTicks();
+        return this->last_time - last_time_copy;
+    }
+
+    // TODO: Can use SDL2 to set timers with callbacks, etc.
+};
