@@ -19,26 +19,26 @@ private:
 
 public:
     Animation(float animation_duration) {
-        animating = false;
-        start_time = -1.0f;
-        duration = animation_duration;
+        this->animating = false;
+        this->start_time = -1.0f;
+        this->duration = animation_duration;
     }
 
     // Begin animating
     void start(float time) {
-        animating = true;
-        start_time = time;
+        this->animating = true;
+        this->start_time = time;
     }
 
     // Advance the animation forward, ending it if past duration
     float progress(float current_time) {
-        if (start_time < 0.0f) {
+        if (this->start_time < 0.0f) {
             return 0.0f;
         }
 
-        float progress = (current_time - start_time) / duration;
+        float progress = (current_time - this->start_time) / this->duration;
         if (progress > 1.0f) {
-            animating = false;
+            this->animating = false;
             return 0.0f;
         }
 
@@ -48,20 +48,20 @@ public:
     // TODO: How to explain this? How to interface with this feature?
     // Ideally, this would be working user-specified easing functions & states
     void bounce(float current_time) {
-        if (!animating) return;
+        if (!this->animating) return;
 
         float percentage = progress(current_time);
         // FIXME: This is only true for the mouse as defined in SDF2d.frag
         if (percentage > 0.5f) {
             // Sets start_time such that progress(current_time) == 1 - percentage
-            start_time = duration * (percentage - 1.0f) + current_time;
+            this->start_time = this->duration * (percentage - 1.0f) + current_time;
         }
     }
 
     // Reset the animation (and stop it)
     void reset() {
-        animating = false;
-        start_time = -1.0f;
+        this->animating = false;
+        this->start_time = -1.0f;
     }
 private:
 

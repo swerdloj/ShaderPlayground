@@ -74,7 +74,7 @@ GLuint generate_program() {
 	std::string vertex_shader_string = readFromFile("shaders/screen_quad.vert");
 	const GLchar* vertex_shader_source = vertex_shader_string.c_str();
 	
-	std::string fragment_shader_string = readFromFile("shaders/SDF/SDF2d.frag");
+	std::string fragment_shader_string = readFromFile("shaders/SDF2d.frag");
 	const GLchar* fragment_shader_source = fragment_shader_string.c_str();
 
 	// Create & compile vertex shader

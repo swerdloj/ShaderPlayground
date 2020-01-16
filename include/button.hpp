@@ -10,16 +10,16 @@ public:
 private:
 
 public:
-    Button(float button_width, float button_height, Point button_center) {
-        width = button_width;
-        height = button_height;
-        center = button_center;
+    Button(float width, float height, Point center) {
+        this->width = width;
+        this->height = height;
+        this->center = center;
     }
 
-    Button(float button_width, float button_height, float x, float y) {
-        width = button_width;
-        height = button_height;
-        center = Point {x , y};
+    Button(float width, float height, float x, float y) {
+        this->width = width;
+        this->height = height;
+        this->center = Point {x , y};
     }
 
     bool contains(float x, float y) {

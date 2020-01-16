@@ -227,5 +227,10 @@ void main() {
 
     // Gamma correction
     color = pow( clamp(color, 0., 1.), vec3(0.4545) );
+	
+	if( mod(gl_FragCoord.y, 6.) < 2.) {
+		color -= vec3(0.01);
+	}
+	
     out_color = vec4(color, 1.);
 }
