@@ -11,6 +11,7 @@ namespace EasingFunctions {
     }
 
     float quadratic(float from, float to, float progress) {
+
         return 0.0f;
     }
 
@@ -30,7 +31,6 @@ namespace EasingFunctions {
 // TODO: Completion callback
 class Animation {
     /* DATA */
-
 public:
     bool animating; // Whether the animation should be going
     Uint32 start_time; // Time when animation began
@@ -61,7 +61,6 @@ public:
 
     void reverse(Uint32 current_time) {
         float to_temp = this->to;
-
         this->to = this->from;
         this->from = to_temp;
 
@@ -76,6 +75,20 @@ public:
         this->start_time = time;
     }
 
+    // TODO: Easing key frames & values should be stored (from & to)
+    float ease(Uint32 current_time) {
+        return this->easing_function( this->from, this->to, this->progress(current_time) );
+    }
+
+    // Reset the animation (and stop it)
+    void reset() {
+        this->animating = false;
+        this->start_time = 0;
+
+        // this->from = 0.0f;
+        // this->to = 0.0f;
+    }
+private:
     // Advance the animation forward, ending it if past duration
     float progress(Uint32 current_time) {
         if (this->start_time == 0) {
@@ -90,19 +103,5 @@ public:
 
         return progress;
     }
-
-    // TODO: Easing key frames & values should be stored (from & to)
-    float ease(Uint32 current_time) {
-        return this->easing_function( this->from, this->to, this->progress(current_time) );
-    }
-
-    // Reset the animation (and stop it)
-    void reset() {
-        this->animating = false;
-        this->start_time = 0;
-        this->from = 0.0f;
-        this->to = 0.0f;
-    }
-private:
 
 };

@@ -7,7 +7,6 @@ layout(location = 2) uniform float u_time; // Time in ms
 layout(location = 3) uniform vec3 u_position; // User position
 layout(location = 4) uniform float u_mouse_radius;
 layout(location = 5) uniform vec4 u_test_button; // [width, height, center.x, center.y]
-layout(location = 6) uniform float u_selector_animation_state;
 
 // Output to the framebuffer
 out vec4 out_color;
@@ -95,16 +94,7 @@ MapResult map(vec2 point) {
 
     result.scene_distance = sd_smooth_min(circle1.scene_distance, box_morph, 0.2);
 
-    // "UI" Testing
-    vec2 test_button_size = u_test_button.xy;
-    vec2 test_button_size_max = test_button_size + 0.10;
-    // Temporary linear easing
-    if (u_selector_animation_state < 0.5) {
-        test_button_size = mix(test_button_size, test_button_size_max, u_selector_animation_state);
-    } else {
-        test_button_size = mix(test_button_size_max, test_button_size, u_selector_animation_state);
-    }
-    MapResult test_button = MapResult( sd_rect(point - u_test_button.zw, test_button_size), MAT_GLOWY );
+    MapResult test_button = MapResult( sd_rect(point - u_test_button.zw, u_test_button.xy), MAT_GLOWY );
     result = scene_add(result, test_button);
     
 
@@ -127,10 +117,6 @@ MapResult map(vec2 point) {
     // if () {
         
     // }
-    
-    // Defined on CPU
-    //float mouse_size = 0.05;
-    //float mouse_size_max = 0.10;
 
     // TODO: Implement easing functions on CPU (here is VERY expensive)
     // if (u_animation_state < 0.5) { // Grow

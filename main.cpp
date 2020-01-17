@@ -174,9 +174,9 @@ int main(int argc, char* argv[]) {
 	Animation mouse_animation = Animation(100, 0.04f, 0.02f, EasingFunctions::linear);
 	SDL_ShowCursor(SDL_DISABLE);
 	bool fullscreen = false;
-	Button test_button = Button(160.f, 80.f, window_width/2.f, window_height/2.f - 200.0f);
+	Button test_button = Button(160.0f, 80.0f, window_width/2.f, window_height/2.f - 200.0f);
 	// Button test_selector = Button(160.f + 20.0f, 80.f + 20.f, window_width/2.f, window_height/2.f - 200.0f);
-	Animation button_animation = Animation(250, 0, 0, EasingFunctions::linear);
+	Animation button_animation = Animation(500, 100.0f, 200.0f, EasingFunctions::linear);
 	Timer timer = Timer();
 
 	while (!should_quit) {
@@ -222,11 +222,13 @@ int main(int argc, char* argv[]) {
 					// Check for button click
 					// TODO: Button animation is still done in the shader
 					if (test_button.contains(event.button.x, window_dimensions_uniform[1] - event.button.y)) {
-						if (button_animation.animating) {
-							button_animation.reverse(time_uniform);
-						} else {
+						if (!button_animation.animating) {
 							// printf("[CLICK]: Clicked 'test_button'");
-							button_animation.start(time_uniform);
+							if (!button_animation.reversed) {
+								button_animation.start(time_uniform);
+							} else {
+								button_animation.reverse(time_uniform);
+							}
 						}
 					}
 				}
@@ -330,6 +332,14 @@ int main(int argc, char* argv[]) {
 			translation_uniform[2] += 0.01f;
 		}
 
+		// FIXME: This shouldn't be here (should be managed with all other animations)
+		// FIXME: This is a hack
+		if (!button_animation.animating && (time_uniform > button_animation.start_time + button_animation.duration) && !button_animation.reversed) {
+			button_animation.reverse(time_uniform);
+		}
+		test_button.width = button_animation.ease(time_uniform);
+		test_button.height = button_animation.ease(time_uniform);
+
 		/* Draw to screen here */
 
 		// TODO: Camera should be processed *before* the fragment shader (technically, this would happen in the vertex shader)
@@ -343,7 +353,6 @@ int main(int argc, char* argv[]) {
 		glUniform3fv(3, 1, translation_uniform); // Move triangle
 		glUniform1f( 4,    mouse_animation.ease(time_uniform));
 		glUniform4fv(5, 1, test_button.normalize(window_dimensions_uniform[0], window_dimensions_uniform[1]));
-		glUniform1f( 6,    button_animation.progress(time_uniform));
 
 		// Draw a triangle
 		glDrawArrays(GL_TRIANGLES, 0, 3); // sends vertices through the OpenGL pipeline
