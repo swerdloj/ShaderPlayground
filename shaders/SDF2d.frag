@@ -5,7 +5,7 @@ layout(location = 0) uniform vec2 u_screen_dimensions; // Screen dimensions (x, 
 layout(location = 1) uniform vec2 u_mouse_position; // Mouse position (x, y)
 layout(location = 2) uniform float u_time; // Time in ms
 layout(location = 3) uniform vec3 u_position; // User position
-layout(location = 4) uniform float u_mouse_animation_state;
+layout(location = 4) uniform float u_mouse_radius;
 layout(location = 5) uniform vec4 u_test_button; // [width, height, center.x, center.y]
 layout(location = 6) uniform float u_selector_animation_state;
 
@@ -128,15 +128,9 @@ MapResult map(vec2 point) {
         
     // }
     
-    float mouse_size = 0.05;
-    float mouse_size_max = 0.10;
-    
-    // Temporary linear easing
-    if (u_mouse_animation_state < 0.5) {
-        mouse_size = mix(mouse_size, mouse_size_max, u_mouse_animation_state);
-    } else {
-        mouse_size = mix(mouse_size_max, mouse_size, u_mouse_animation_state);
-    }
+    // Defined on CPU
+    //float mouse_size = 0.05;
+    //float mouse_size_max = 0.10;
 
     // TODO: Implement easing functions on CPU (here is VERY expensive)
     // if (u_animation_state < 0.5) { // Grow
@@ -158,10 +152,8 @@ MapResult map(vec2 point) {
     //     }
     // }
 
-    MapResult mouse = MapResult( sd_circle(point - mouse_pos_normalized, mouse_size), MAT_GLOWY ); 
+    MapResult mouse = MapResult( sd_circle(point - mouse_pos_normalized, u_mouse_radius), MAT_GLOWY ); 
     result = scene_smooth_min(result, mouse, 0.1);
-
-    // d = sd_smooth_min(d, mouse, 0.3);
 
     return result;
 }
@@ -216,12 +208,12 @@ void main() {
     // RayResult result = march(uv, vec2(0.));
     RayResult result = march(uv - u_position.xy, vec2(0.));
 
-    // color = vec3(smoothstep(0.3, 0., result.marched_distance)) * object_color; // Aliased object
+    //color = vec3(smoothstep(0.3, 0., result.marched_distance)) * object_color; // Aliased object
 
     // TODO: Separate out lighting like for 3d SDFs, and do another ray-cast for the lighting
     if (result.material == MAT_GLOWY) {
         vec3 light_color = vec3(1.3, 0.7, 3.)*2.;
-        // color += get_glow(result.min_distance, 0.003, 0.01) * light_color;
+        //color += get_glow(result.min_distance, 0.003, 0.01) * light_color;
         color += get_glow2(result.min_distance, 0.00005) * light_color;
     }
     else if (result.material == MAT_NORMAL) {
@@ -230,10 +222,6 @@ void main() {
 
     // Gamma correction
     color = pow( clamp(color, 0., 1.), vec3(0.4545) );
-	
-	// if( mod(gl_FragCoord.y, 6.) < 2.) {
-	// 	color -= vec3(0.01);
-	// }
 	
     out_color = vec4(color, 1.);
 }

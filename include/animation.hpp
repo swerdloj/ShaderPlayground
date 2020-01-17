@@ -3,23 +3,6 @@
 //  They can then be reset simultaneously
 // Confirm that this is necessary
 
-// Easing functions available to the user
-enum Easing {
-    Linear,
-    Cubic,
-    Quadratic,
-    Exponential,
-    Sine,
-    // TODO: Add more easings
-};
-
-struct Animator {
-    Easing easing; // Which easing function to use
-    float key_frame; // Key frame for switching animation/style
-    float start_time; // When the animation started
-    float duration; // How long the animation is
-};
-
 // TODO: Implement
 namespace EasingFunctions {
     // Simple, linear easing (same as `mix` from GLSL)
@@ -38,6 +21,10 @@ namespace EasingFunctions {
     float exponential(float from, float to, float progress) {
         return 0.0f;
     }
+
+    float sine(float from, float to, float progress) {
+
+    }
 }
 
 // TODO: Completion callback
@@ -49,30 +36,41 @@ public:
     Uint32 start_time; // Time when animation began
     // TODO: Ensure this becomes seconds
     Uint32 duration; // Animation length
+    bool reversed;
 private:
-    // Easing easing; // Easing type
-    float (*easing_function)(float from, float to, float progress); // Easing function (can be custom)
+    // Easing function (can be custom)
+    float (*easing_function)(float from, float to, float progress);
+    float from; // ease from this value
+    float to;   // to this value
 
     /* METHODS */
-
 public:
-    Animation(Uint32 animation_duration) {
+    Animation(Uint32 animation_duration, float from, float to, float (*easing_function)(float, float, float)) {
         this->animating = false;
         this->start_time = 0;
         this->duration = animation_duration;
-        // this->easing = Easing::Linear; // TODO: Temporary default
-        this->easing_function = &EasingFunctions::linear; // TODO: Temporary default
-    }
 
-    Animation(Uint32 animation_duration, float (*easing_function)(float, float, float)) {
-        this->animating = false;
-        this->start_time = 0;
-        this->duration = animation_duration;
+        this->from = from;
+        this->to = to;
+
+        this->reversed = false;
+
         // TODO: Cannot call another constructor from constructor
         this->easing_function = easing_function;
     }
 
-    // Begin animating
+    void reverse(Uint32 current_time) {
+        float to_temp = this->to;
+
+        this->to = this->from;
+        this->from = to_temp;
+
+        this->reversed = !this->reversed;
+
+        this->start_time = this->duration * (this->progress(current_time) - 1.0f) + current_time;
+    }
+
+    // Begin animating from start to final value ('from' to 'to')
     void start(Uint32 time) {
         this->animating = true;
         this->start_time = time;
@@ -80,41 +78,30 @@ public:
 
     // Advance the animation forward, ending it if past duration
     float progress(Uint32 current_time) {
-        if (this->start_time <= 0) {
+        if (this->start_time == 0) {
             return 0.0f;
         }
 
         float progress = (float)(current_time - this->start_time) / (float)this->duration;
         if (progress > 1.0f) {
             this->animating = false;
-            return 0.0f;
+            return 1.0f;
         }
 
         return progress;
     }
 
     // TODO: Easing key frames & values should be stored (from & to)
-    float ease(Uint32 current_time, float from, float to) {
-        return this->easing_function(from, to, this->progress(current_time));
-    }
-
-    // TODO: How to explain this? How to interface with this feature?
-    // Ideally, this would be working user-specified easing functions & states
-    void bounce(Uint32 current_time) {
-        if (!this->animating) return;
-
-        float percentage = progress(current_time);
-        // FIXME: This is only true for the mouse as defined in SDF2d.frag
-        if (percentage > 0.5f) {
-            // Sets start_time such that progress(current_time) == 1 - percentage
-            this->start_time = this->duration * (percentage - 1.0f) + current_time;
-        }
+    float ease(Uint32 current_time) {
+        return this->easing_function( this->from, this->to, this->progress(current_time) );
     }
 
     // Reset the animation (and stop it)
     void reset() {
         this->animating = false;
         this->start_time = 0;
+        this->from = 0.0f;
+        this->to = 0.0f;
     }
 private:
 
