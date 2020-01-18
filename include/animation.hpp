@@ -3,6 +3,8 @@
 //  They can then be reset simultaneously
 // Confirm that this is necessary
 
+#include <functional>
+
 // TODO: Implement
 namespace EasingFunctions {
     // Simple, linear easing (same as `mix` from GLSL)
@@ -38,6 +40,8 @@ public:
     Uint32 duration; // Animation length
     bool reversed;
 private:
+    // Finish callback
+    std::function<void()> on_finish = NULL;
     // Easing function (can be custom)
     float (*easing_function)(float from, float to, float progress);
     float from; // ease from this value
@@ -59,6 +63,12 @@ public:
         this->easing_function = easing_function;
     }
 
+    // Assign a callback for when animation completes
+    void with_on_finish(std::function<void()> on_finish_callback) {
+        this->on_finish = on_finish_callback;
+    }
+
+    // TODO: Get rid of this function. It will cause nothing but issues later on.
     void reverse(Uint32 current_time) {
         float to_temp = this->to;
         this->to = this->from;
@@ -82,12 +92,21 @@ public:
 
     // Reset the animation (and stop it)
     void reset() {
+        if (this->reversed) {
+            this->reverse(0); // swap to and from back to normal
+        }
+
         this->animating = false;
         this->start_time = 0;
 
         // this->from = 0.0f;
         // this->to = 0.0f;
     }
+
+    bool finished(Uint32 current_time) {
+        return current_time > this->start_time + this->duration;
+    }
+
 private:
     // Advance the animation forward, ending it if past duration
     float progress(Uint32 current_time) {
@@ -96,8 +115,14 @@ private:
         }
 
         float progress = (float)(current_time - this->start_time) / (float)this->duration;
-        if (progress > 1.0f) {
+        // Animation is now complete
+        if (progress >= 1.0f) {
             this->animating = false;
+
+            if (this->on_finish != NULL) {
+                this->on_finish();
+            }
+
             return 1.0f;
         }
 

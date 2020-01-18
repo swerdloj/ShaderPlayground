@@ -110,6 +110,7 @@ void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 }
 #endif
 
+
 int main(int argc, char* argv[]) {
 
 	/* Initialization */
@@ -176,8 +177,16 @@ int main(int argc, char* argv[]) {
 	bool fullscreen = false;
 	Button test_button = Button(160.0f, 80.0f, window_width/2.f, window_height/2.f - 200.0f);
 	// Button test_selector = Button(160.f + 20.0f, 80.f + 20.f, window_width/2.f, window_height/2.f - 200.0f);
-	Animation button_animation = Animation(500, 100.0f, 200.0f, EasingFunctions::linear);
 	Timer timer = Timer();
+
+	Animation button_animation = Animation(500, 100.0f, 200.0f, EasingFunctions::linear);
+	// button_animation.with_on_finish(
+	// 	[&button_animation, &time_uniform] () {
+	// 		printf("This is from a lambda\n");
+	// 		if (!button_animation.animating && !button_animation.reversed) {
+	// 			button_animation.reverse(time_uniform);
+	// 		}
+	// });
 
 	while (!should_quit) {
 		/* Clear frame here*/
@@ -222,13 +231,14 @@ int main(int argc, char* argv[]) {
 					// Check for button click
 					// TODO: Button animation is still done in the shader
 					if (test_button.contains(event.button.x, window_dimensions_uniform[1] - event.button.y)) {
-						if (!button_animation.animating) {
-							// printf("[CLICK]: Clicked 'test_button'");
-							if (!button_animation.reversed) {
-								button_animation.start(time_uniform);
-							} else {
-								button_animation.reverse(time_uniform);
-							}
+						// printf("[CLICK]: Clicked 'test_button'");
+						if (!button_animation.animating) { // if in rest state
+							printf("START\n");
+							button_animation.start(time_uniform); // begin
+						} 
+						else if (button_animation.reversed) { // if shrinking
+							printf("REVERSE\n");
+							button_animation.reverse(time_uniform); // grow
 						}
 					}
 				}
@@ -334,11 +344,16 @@ int main(int argc, char* argv[]) {
 
 		// FIXME: This shouldn't be here (should be managed with all other animations)
 		// FIXME: This is a hack
-		if (!button_animation.animating && (time_uniform > button_animation.start_time + button_animation.duration) && !button_animation.reversed) {
-			button_animation.reverse(time_uniform);
+		if (button_animation.finished(time_uniform) && !button_animation.reversed) {
+			// printf("2nd REVERSE\n");
+			// button_animation.reverse(time_uniform);
+		} else if (button_animation.finished(time_uniform) && button_animation.reversed) {
+			// button_animation.reversed = false;
 		}
+
 		test_button.width = button_animation.ease(time_uniform);
 		test_button.height = button_animation.ease(time_uniform);
+		// printf(button_animation.reversed ? "Reversed\n" : "Normal\n");
 
 		/* Draw to screen here */
 
