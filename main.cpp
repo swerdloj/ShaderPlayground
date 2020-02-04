@@ -180,13 +180,11 @@ int main(int argc, char* argv[]) {
 	Timer timer = Timer();
 
 	Animation button_animation = Animation(500, 100.0f, 200.0f, EasingFunctions::linear);
-	// button_animation.with_on_finish(
-	// 	[&button_animation, &time_uniform] () {
-	// 		printf("This is from a lambda\n");
-	// 		if (!button_animation.animating && !button_animation.reversed) {
-	// 			button_animation.reverse(time_uniform);
-	// 		}
-	// });
+	button_animation.with_on_finish(
+		[&button_animation, &time_uniform] () {
+			printf("This is from a lambda\n");
+			button_animation.reverse(time_uniform);
+	});
 
 	while (!should_quit) {
 		/* Clear frame here*/
@@ -342,18 +340,9 @@ int main(int argc, char* argv[]) {
 			translation_uniform[2] += 0.01f;
 		}
 
-		// FIXME: This shouldn't be here (should be managed with all other animations)
-		// FIXME: This is a hack
-		if (button_animation.finished(time_uniform) && !button_animation.reversed) {
-			// printf("2nd REVERSE\n");
-			// button_animation.reverse(time_uniform);
-		} else if (button_animation.finished(time_uniform) && button_animation.reversed) {
-			// button_animation.reversed = false;
-		}
-
+		// FIXME: This shouldn't be here
 		test_button.width = button_animation.ease(time_uniform);
 		test_button.height = button_animation.ease(time_uniform);
-		// printf(button_animation.reversed ? "Reversed\n" : "Normal\n");
 
 		/* Draw to screen here */
 

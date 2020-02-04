@@ -1,3 +1,5 @@
+#include "animation.hpp"
+
 struct Point {
     float x, y;
 };
@@ -8,6 +10,7 @@ public:
     float height;
     Point center;
 private:
+    std::optional<Animation> animation = {};
 
 public:
     Button(float width, float height, Point center) {
@@ -20,6 +23,10 @@ public:
         this->width = width;
         this->height = height;
         this->center = Point {x , y};
+    }
+
+    Button with_animation(Animation animation) {
+        this->animation = animation;
     }
 
     bool contains(float x, float y) {
