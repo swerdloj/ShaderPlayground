@@ -4,8 +4,6 @@
 // #include "stdio.h"
 
 #include "file_loader.hpp"
-#include "animation.hpp"
-#include "button.hpp"
 #include "timing.hpp"
 
 // NOTE: MSVC only
@@ -168,23 +166,9 @@ int main(int argc, char* argv[]) {
 	glUseProgram(rendering_program);
 	
 
-	/* Non-essential stuff and testing stuff */
-	// TODO: All view objects should be managed (iterable)
-
 	// TODO: Keep mouse large while held down, only shrink when released
-	Animation mouse_animation = Animation(100, 0.04f, 0.02f, EasingFunctions::linear);
-	SDL_ShowCursor(SDL_DISABLE);
 	bool fullscreen = false;
-	Button test_button = Button(160.0f, 80.0f, window_width/2.f, window_height/2.f - 200.0f);
-	// Button test_selector = Button(160.f + 20.0f, 80.f + 20.f, window_width/2.f, window_height/2.f - 200.0f);
 	Timer timer = Timer();
-
-	Animation button_animation = Animation(500, 100.0f, 200.0f, EasingFunctions::linear);
-	button_animation.with_on_finish(
-		[&button_animation, &time_uniform] () {
-			printf("This is from a lambda\n");
-			button_animation.reverse(time_uniform);
-	});
 
 	while (!should_quit) {
 		/* Clear frame here*/
@@ -216,41 +200,18 @@ int main(int argc, char* argv[]) {
 			// Note: SDL2 places (0, 0) at top right. OpenGL places it at bottom left.
 			else if (event.type == SDL_MOUSEBUTTONDOWN) {
 				if (event.button.button == SDL_BUTTON_LEFT) {
-					// printf("[MOUSE]: Left Click\n");
-					if (!mouse_animation.animating) {
-						// printf("[ANIMATION]: LClick Animation Started\n");
-						if (!mouse_animation.reversed) {
-							mouse_animation.start(time_uniform);
-						} else {
-							mouse_animation.reverse(time_uniform);
-						}
-					}
-
-					// Check for button click
-					// TODO: Button animation is still done in the shader
-					if (test_button.contains(event.button.x, window_dimensions_uniform[1] - event.button.y)) {
-						// printf("[CLICK]: Clicked 'test_button'");
-						if (!button_animation.animating) { // if in rest state
-							printf("START\n");
-							button_animation.start(time_uniform); // begin
-						} 
-						else if (button_animation.reversed) { // if shrinking
-							printf("REVERSE\n");
-							button_animation.reverse(time_uniform); // grow
-						}
-					}
+					printf("[MOUSE]: Left Click\n");
 				}
 			}
 			else if (event.type == SDL_MOUSEBUTTONUP) {
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					mouse_animation.reverse(time_uniform);
-				}
 			}
+
 			else if (event.type == SDL_MOUSEMOTION) {
 				//printf("[MOUSE]: Mouse at (%i, %i)\n", event.motion.x, event.motion.y);
 				mouse_coords_uniform[0] = event.motion.x;
 				mouse_coords_uniform[1] = window_dimensions_uniform[1] - event.motion.y;
 			}
+
 			// Handle key presses (rather than checking if a key is down)
 			else if (event.type == SDL_KEYDOWN) {
 				// Toggle cursor
@@ -289,9 +250,6 @@ int main(int argc, char* argv[]) {
 					translation_uniform[1] = 0.f;
 					translation_uniform[2] = 0.f;
 					time_uniform = 0;
-
-					mouse_animation.reset();
-					button_animation.reset();
 
 					printf("[RESET]: Reset position and time\n");
 				}
@@ -340,10 +298,6 @@ int main(int argc, char* argv[]) {
 			translation_uniform[2] += 0.01f;
 		}
 
-		// FIXME: This shouldn't be here
-		test_button.width = button_animation.ease(time_uniform);
-		test_button.height = button_animation.ease(time_uniform);
-
 		/* Draw to screen here */
 
 		// TODO: Camera should be processed *before* the fragment shader (technically, this would happen in the vertex shader)
@@ -355,8 +309,6 @@ int main(int argc, char* argv[]) {
 		glUniform2fv(1, 1, mouse_coords_uniform); // Mouse coordinates in pixels
 		glUniform1f( 2,    (float)time_uniform); // Time (random unit) TODO: use seconds
 		glUniform3fv(3, 1, translation_uniform); // Move triangle
-		glUniform1f( 4,    mouse_animation.ease(time_uniform));
-		glUniform4fv(5, 1, test_button.normalize(window_dimensions_uniform[0], window_dimensions_uniform[1]));
 
 		// Draw a triangle
 		glDrawArrays(GL_TRIANGLES, 0, 3); // sends vertices through the OpenGL pipeline

@@ -5,8 +5,6 @@ layout(location = 0) uniform vec2 u_screen_dimensions; // Screen dimensions (x, 
 layout(location = 1) uniform vec2 u_mouse_position; // Mouse position (x, y)
 layout(location = 2) uniform float u_time; // Time in ms
 layout(location = 3) uniform vec3 u_position; // User position
-layout(location = 4) uniform float u_mouse_radius;
-layout(location = 5) uniform vec4 u_test_button; // [width, height, center.x, center.y]
 
 // Output to the framebuffer
 out vec4 out_color;
@@ -94,10 +92,6 @@ MapResult map(vec2 point) {
 
     result.scene_distance = sd_smooth_min(circle1.scene_distance, box_morph, 0.2);
 
-    MapResult test_button = MapResult( sd_rect(point - u_test_button.zw, u_test_button.xy), MAT_GLOWY );
-    result = scene_add(result, test_button);
-    
-
     vec2 button1_pos = point - vec2(0.85, 0.7);
     vec2 button2_pos = point - vec2(0.85, 0.35);
 
@@ -112,33 +106,8 @@ MapResult map(vec2 point) {
     MapResult selector2 = MapResult( sd_rect(selector2_pos, vec2(0.25, 0.15)), MAT_GLOWY );
 
     result.scene_distance = min(result.scene_distance, sd_morph(selector1.scene_distance, selector2.scene_distance, sin(u_time*.002)*0.5 + 0.5));
-    
-    // TODO: Transition on mouse-hover
-    // if () {
-        
-    // }
 
-    // TODO: Implement easing functions on CPU (here is VERY expensive)
-    // if (u_animation_state < 0.5) { // Grow
-    //     float t = u_animation_state / (0.5/2.);
-    //     if (t < 1.) {
-    //         mouse_size = 0.03/2.*t*t*t + mouse_size;
-    //     } else {
-    //         t -= 2.;
-    //         mouse_size = 0.03/2.*(t*t*t + 2.) + mouse_size;
-    //     }
-    // } 
-    // else { // Shrink
-    //     float t = u_animation_state / (1./2.);
-    //     if (t < 1.) {
-    //         mouse_size = 0.03/2.*t*t*t + mouse_size;
-    //     } else {
-    //         t -= 2.;
-    //         mouse_size = 0.03/2.*(t*t*t + 2.) + mouse_size;
-    //     }
-    // }
-
-    MapResult mouse = MapResult( sd_circle(point - mouse_pos_normalized, u_mouse_radius), MAT_GLOWY ); 
+    MapResult mouse = MapResult( sd_circle(point - mouse_pos_normalized, 0.04), MAT_GLOWY ); 
     result = scene_smooth_min(result, mouse, 0.1);
 
     return result;
