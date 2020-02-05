@@ -3,6 +3,15 @@
 - [SDL2](https://www.libsdl.org/download-2.0.php)
 - OpenGL
 
+# Shader Playground
+- MIT License
+- Simple application for toying with shaders. The included uniforms are:
+  - Mouse coordinates
+  - Screen dimensions
+  - Time
+  - Camera Position (in 3D space, but no rotations)
+- Using SDL2, more uniforms can easily be created and bound
+
 # Build Instructions (Windows)
 
 ## G++
