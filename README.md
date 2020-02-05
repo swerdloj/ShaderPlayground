@@ -4,6 +4,14 @@
 - OpenGL
 
 # Shader Playground
+## Usage
+- See **Dependencies** above
+- Modify `SDF2d.frag` with your shader
+  - This can be renamed if updated in `main.cpp`
+- Press **F5** to reload the shader
+- I recommend using vscode with a glsl extension as your editor
+
+## About
 - MIT License
 - Simple application for toying with shaders. The included uniforms are:
   - Mouse coordinates
