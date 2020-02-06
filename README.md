@@ -10,6 +10,17 @@
   - This can be renamed if updated in `main.cpp`
 - Press **F5** to reload the shader
 - I recommend using vscode with a glsl extension as your editor
+## Controls (must be handled within the shader via uniforms)
+- **LShift**: Zoom in
+- **LCtrl**: Zoom out
+- **W**: Move up
+- **A**: Move down
+- **S**: Move left
+- **D**: Move down
+- **R**: Reset time
+- **Space**: Pause/Unpause time
+- **F5**: Reload shader (hot-reloading)
+- **F11**: Toggle fullscreen (kind of broken)
 
 ## About
 - MIT License

@@ -9,21 +9,6 @@ layout(location = 3) uniform vec3 u_position; // User position
 // Output to the framebuffer
 out vec4 out_color;
 
-/*
-#define LIGHT_NONE = -1;
-#define LIGHT_GLOW = 1;
-#define LIGHT_BLOOM = 2;
-// etc...
-
-// TODO: Replace the #defines with this
-// TODO: Consider creating a separate struct for light and rendering that separately
-struct Material {
-    int light = LIGHT_NONE;
-    vec4 light_color = vec4(0., 0., 0., 0.); // (Red, Green, Blue, Intensity)
-    vec3 color = vec3(0.); // Material color (Red, Green, Blue) --> vec3(0.) will be transparent
-};
-*/
-
 #define MAT_NONE -1
 #define MAT_GLOWY 1
 #define MAT_NORMAL 2
@@ -114,9 +99,6 @@ MapResult map(vec2 point) {
 }
 
 RayResult march(vec2 ray_origin, vec2 ray_direction) {
-    // float marched_distance = 0.;
-    // float min_distance = 100.;
-
     RayResult raycast = RayResult(0., 100., false, MAT_NONE);
     MapResult scene;
 
@@ -160,7 +142,6 @@ void main() {
     vec3 color = vec3(0.); // Start with no color, then add color as we process the pixel
 
     vec3 object_color = vec3(0.2, 0.1, 0.5)*2.; // TODO: Move this to be defined per shape in map()
-    // RayResult result = march(uv, vec2(0.));
     RayResult result = march(uv - u_position.xy, vec2(0.));
 
     //color = vec3(smoothstep(0.3, 0., result.marched_distance)) * object_color; // Aliased object

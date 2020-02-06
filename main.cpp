@@ -6,33 +6,22 @@
 #include "file_loader.hpp"
 #include "timing.hpp"
 
-// NOTE: MSVC only
-// Q: Why the "32" if this works for x64? (https://docs.microsoft.com/en-us/windows/win32/winprog64/process-interoperability)
+// MSVC only
 #ifdef _MSC_VER
 	#pragma comment(lib, "opengl32.lib")
-	// NOTE: I linked glew32.lib in the project settings
-	//pragma comment(lib, "glew32.lib")
 #endif
 
-/*	TODO:
-
-	1) Log system (tag + message)
-	2) Log timestamps (optional via #define?)
-	3) Break into modules
-*/
 
 // Note: SDL_GetError() gives error string. Functions return negative error codes.
 // Note: We are changing what the window points to (SDL_Window*), hence the double pointer (I don't really understand this)
 void init(SDL_Window** window, SDL_GLContext* gl_context, int width, int height) {
 	// Specify OpenGL version (4.5)
-	// Q: Is this always needed? (See https://wiki.libsdl.org/SDL_GLattr)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
-	// Q: What does this do? The book mentioned something about prefering "core"
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	// Initialize SDL with video (may need to change later such as with audio, etc.)
+	// Initialize SDL with video
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SDL2 Init Error", SDL_GetError(), NULL);
 	}
@@ -69,7 +58,6 @@ GLuint generate_program() {
 	GLuint program; // This represents a "linked executable" GL program
 
 	// This line is needed to keep the string in the stack
-	// std::string vertex_shader_string = readFromFile("shaders/vertex.vert");
 	std::string vertex_shader_string = readFromFile("shaders/screen_quad.vert");
 	const GLchar* vertex_shader_source = vertex_shader_string.c_str();
 	
@@ -110,7 +98,6 @@ void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 
 
 int main(int argc, char* argv[]) {
-
 	/* Initialization */
 	int window_width = 1200;
 	int window_height = 800;
@@ -136,21 +123,15 @@ int main(int argc, char* argv[]) {
 	// These are defined at the very end of the class extension in the book (private:...)
 	GLuint rendering_program = generate_program();
 	GLuint vertex_array_object;
-	// Q: I don't fully understand what these do
+	// Need one VAO to render anything
 	glCreateVertexArrays(1, &vertex_array_object);
 	glBindVertexArray(vertex_array_object);
-
-	// Renderer is no longer needed with OpenGL.
-	// Q: Can I still render over OpenGL though? Such as using sdl_ttf to draw text or similar.
-	//	or, can I combine frame buffers? such as multiple gl programs + an SDL buffer?
-	// SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	bool should_quit = false;
 	SDL_Event event;
 
 	const GLfloat DARK_PURPLE[] = { 50.0f/255.0f, 50/255.0f, 80/255.0f, 1.0f };
 	
-	// FIXME: This is now a Uint32 (change this in the shader & GL calls)
 	GLint time_uniform = 0;
 
 	bool pause_time = false;
@@ -166,7 +147,6 @@ int main(int argc, char* argv[]) {
 	glUseProgram(rendering_program);
 	
 
-	// TODO: Keep mouse large while held down, only shrink when released
 	bool fullscreen = false;
 	Timer timer = Timer();
 
@@ -177,24 +157,21 @@ int main(int argc, char* argv[]) {
 		glClearBufferfv(GL_COLOR, 0, DARK_PURPLE);		
 
 		/* Render/handle stuff here */
-		// Q: How do callbacks work in C++? (to abstract this section away)
 		while (SDL_PollEvent(&event)) {
 			// Happens on window X-out
 			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				should_quit = true;
-				// Don't want to `break` here because we may want to do something before quitting
 			}
 			// Handle windowing events
 			else if (event.type == SDL_WINDOWEVENT) {
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-					// TODO: Resize OpenGL drawable area
 					SDL_GetWindowSize(window, &window_width, &window_height);
 					window_dimensions_uniform[0] = window_width;
 					window_dimensions_uniform[1] = window_height;
 
 					// (x, y), 	Lower left corner of viewport
 					// (w, h)   width & height of viewport
-					glViewport(0, 0, window_width, window_height); // This will stretch the view to accommodate window. TODO: want to simply increase screen size (no scaling)
+					glViewport(0, 0, window_width, window_height);
 				}
 			}
 			// Note: SDL2 places (0, 0) at top right. OpenGL places it at bottom left.
@@ -272,7 +249,6 @@ int main(int argc, char* argv[]) {
 			// TODO: Begin GIF recording on first press, end on second
 			// fill buffer on another thread with per-frame screenshots, then use ffmpeg?
 		}
-		// TODO: How to use these with collision checking (like for clicking buttons)?
 		if (key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) { // up (positive y direction)
 			translation_uniform[1] -= 0.01f;
 		}
